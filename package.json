@@ -1,0 +1,22 @@
+{
+  "name": "todo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/app.js",
+  "scripts": {
+    "start": "webpack-dev-server --hot --inline --content-base public",
+    "build": "webpack",
+    "watch": "webpack-dev-server --hot --inline --content-base public"
+  },
+  "author": "Attila Szeremi",
+  "license": "MIT",
+  "dependencies": {
+    "elm-webpack-loader": "^2.0.1",
+    "webpack": "^1.12.15",
+    "webpack-merge": "^0.10.0"
+  },
+  "devDependencies": {
+    "eslint": "^2.7.0",
+    "eslint-config-airbnb": "^7.0.0"
+  }
+}
