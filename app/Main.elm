@@ -1,7 +1,7 @@
-import Html exposing (Html, div, text, input)
+import Html exposing (Html, div, text, input, del)
 import Html.Attributes exposing (class, type', placeholder)
 import Html.Events exposing (onKeyPress)
-import Keyboard exposing (enter)
+import List exposing (map)
 import WebAPI.Window exposing (alert)
 import Task exposing (Task)
 import Signal exposing (Signal, Address)
@@ -23,15 +23,35 @@ main = app.html
 init : (Model, Effects Action)  
 init =
   let initModel =
-    { count = 0 }
+      { todos =
+        [ ("entry1", False)
+        , ("entry2", False)
+        , ("entry3", False)
+        ]
+      }
   in ( initModel, Effects.none)
 
+type alias TodoItem = (String, Bool)
 
-type alias Model = { count : Int }
+type alias Model =
+  { todos: List ((String, Bool))
+  }
 
 type Action
     = NoOp
     | TodoAddFieldKeypressed Int
+
+displayTodo : TodoItem -> Html
+displayTodo (text', completed) =
+  let row =
+    div [] [ text text' ]
+  in
+  case completed of
+    False ->
+      row
+    -- Wrap it in a <del> element
+    True ->
+      del [] [row]
 
 view : Address Action -> Model -> Html
 view address model =
@@ -39,11 +59,7 @@ view address model =
     [
       div
         [ class "panel" ]
-        [ div [] [ text "entry1" ]
-          , div [] [ text "entry2" ]
-          , div [] [ text "entry3" ]
-
-        ]
+        (map displayTodo model.todos)
       , div []
         [ input
           [ type' "text"
@@ -63,6 +79,6 @@ update action model =
           , alert "enter pressed" |>
             Task.map (always NoOp) |>
               Effects.task
-          ) 
+          )
       )
     _ -> (model, Effects.none)
