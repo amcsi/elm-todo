@@ -1,0 +1,3 @@
+[submodule "elm-web-api"]
+	path = elm-web-api
+	url = https://github.com/rgrempel/elm-web-api.git

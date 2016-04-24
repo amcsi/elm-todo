@@ -45,6 +45,7 @@ module.exports = {
   },
   plugins: [
     new webpack.NoErrorsPlugin(),
+    new webpack.OldWatchingPlugin(),
   ],
   devServer: {
     contentBase: 'public',
