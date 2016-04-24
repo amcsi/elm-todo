@@ -1,4 +1,4 @@
-import Html exposing (Html, div, text, input, del)
+import Html exposing (Html, div, text, input, del, ul, li)
 import Html.Attributes exposing (class, type', placeholder, value)
 import Html.Events exposing (on, onClick, onKeyPress, targetValue)
 import List exposing (indexedMap, map)
@@ -52,8 +52,9 @@ displayTodo : Address Action -> Int -> TodoItem -> Html
 displayTodo address index (text', completed) =
   let
     row =
-      div
+      li
         [ onClick address (Toggle index)
+        , class "clickable"
         ]
         [ text text'
         ]
@@ -74,14 +75,19 @@ toggle targetIndex currentIndex (text', toggled) =
 
 view : Address Action -> Model -> Html
 view address model =
-  div []
+  div
+    [ class "container col-md-4" ]
     [
       div
         [ class "panel" ]
-        (indexedMap (displayTodo address) model.todos)
+        [ ul
+            []
+            (indexedMap (displayTodo address) model.todos)
+        ]
       , div []
         [ input
           [ type' "text"
+          , class "form-control"
           , value model.newEntryValue
           , placeholder "Enter task description here"
           , onKeyPress address TodoAddFieldKeypressed
@@ -102,13 +108,13 @@ update action model =
       )
 
     TodoAddFieldKeypressed key ->
-      ( case key of
-        13 ->
+      ( if key == enterKey
+        then
           { model
               | todos = (model.newEntryValue, False) :: model.todos
               , newEntryValue = ""
           }
-        _ -> model
+        else model
       , Effects.none
       )
     UpdateField value ->
