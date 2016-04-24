@@ -1,4 +1,4 @@
-import Html exposing (Html, div, text, input, del, ul, li)
+import Html exposing (Html, button, div, text, input, del, ul, li)
 import Html.Attributes exposing (class, type', placeholder, value)
 import Html.Events exposing (on, onClick, onKeyPress, targetValue)
 import List exposing (indexedMap, map)
@@ -43,6 +43,7 @@ type alias Model =
 
 type Action
     = NoOp
+    | ClearDone
     | Toggle Int
     | TodoAddFieldKeypressed Int
     | TodoAddFieldAfterKeypressed Int
@@ -94,6 +95,14 @@ view address model =
           , on "input" targetValue (Signal.message address << UpdateField) ]
           []
         ]
+      , div []
+          [ button
+              [ type' "button"
+              , class "btn btn-danger"
+              , onClick address ClearDone
+              ]
+              [ text "Clear done" ]
+          ]
     ]
 
 update : Action -> Model -> (Model, Effects Action)
@@ -106,7 +115,6 @@ update action model =
         }
       , Effects.none
       )
-
     TodoAddFieldKeypressed key ->
       ( if key == enterKey
         then
@@ -114,13 +122,20 @@ update action model =
               | todos = (model.newEntryValue, False) :: model.todos
               , newEntryValue = ""
           }
-        else model
-      , Effects.none
+        else
+          model
+        , Effects.none
       )
     UpdateField value ->
       ( { model
           | newEntryValue = value
         }
+        , Effects.none
+      )
+    ClearDone ->
+      ( { model
+            | todos = List.filter (\(_, done) -> not done) model.todos
+          }
         , Effects.none
       )
     _ -> (model, Effects.none)
