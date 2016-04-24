@@ -1,7 +1,7 @@
 import Html exposing (Html, div, text, input, del)
 import Html.Attributes exposing (class, type', placeholder, value)
-import Html.Events exposing (on, onKeyPress, targetValue)
-import List exposing (map)
+import Html.Events exposing (on, onClick, onKeyPress, targetValue)
+import List exposing (indexedMap, map)
 import WebAPI.Window exposing (alert)
 import Task exposing (Task)
 import Signal exposing (Signal, Address)
@@ -43,21 +43,34 @@ type alias Model =
 
 type Action
     = NoOp
+    | Toggle Int
     | TodoAddFieldKeypressed Int
     | TodoAddFieldAfterKeypressed Int
     | UpdateField String
 
-displayTodo : TodoItem -> Html
-displayTodo (text', completed) =
-  let row =
-    div [] [ text text' ]
+displayTodo : Address Action -> Int -> TodoItem -> Html
+displayTodo address index (text', completed) =
+  let
+    row =
+      div
+        [ onClick address (Toggle index)
+        ]
+        [ text text'
+        ]
   in
-  case completed of
-    False ->
-      row
-    -- Wrap it in a <del> element
-    True ->
-      del [] [row]
+    case completed of
+      False ->
+        row
+      -- Wrap it in a <del> element
+      True ->
+        del [] [row]
+
+toggle : Int -> Int -> TodoItem -> TodoItem
+toggle targetIndex currentIndex (text', toggled) =
+  if targetIndex == currentIndex then
+    (text', not toggled)
+  else
+    (text', toggled)
 
 view : Address Action -> Model -> Html
 view address model =
@@ -65,7 +78,7 @@ view address model =
     [
       div
         [ class "panel" ]
-        (map displayTodo model.todos)
+        (indexedMap (displayTodo address) model.todos)
       , div []
         [ input
           [ type' "text"
@@ -80,6 +93,14 @@ view address model =
 update : Action -> Model -> (Model, Effects Action)
 update action model =
   case action of
+    Toggle index ->
+      ( { model |
+            todos = indexedMap (toggle index) model.todos
+        
+        }
+      , Effects.none
+      )
+
     TodoAddFieldKeypressed key ->
       ( case key of
         13 ->
