@@ -103,7 +103,7 @@ view address model =
         ]
       , div []
         <| concat [
-          let buttonText = "Clear done " ++ (toString <| length <| doneTodos model.todos)
+          let buttonText = "Clear done " ++ (doneTodos model.todos |> length |> toString)
           in
             if (not <| isEmpty <| doneTodos model.todos) then
               [ button
