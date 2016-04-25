@@ -1,13 +1,13 @@
+import Basics exposing (toString)
 import Html exposing (Html, button, div, text, input, del, ul, li)
 import Html.Attributes exposing (class, type', placeholder, value)
 import Html.Events exposing (on, onClick, onKeyPress, targetValue)
-import List exposing (indexedMap, map)
-import WebAPI.Window exposing (alert)
-import Task exposing (Task)
+import List exposing (concat, indexedMap, isEmpty, length, map)
 import Signal exposing (Signal, Address)
 import Effects exposing (Effects)
 import StartApp exposing (App)
 
+enterKey : Int
 enterKey = 13
 
 app : App Model
@@ -74,6 +74,12 @@ toggle targetIndex currentIndex (text', toggled) =
   else
     (text', toggled)
 
+doneTodos : List TodoItem -> List TodoItem
+doneTodos = List.filter (\(_, done) -> done)
+
+notDoneTodos : List TodoItem -> List TodoItem
+notDoneTodos = List.filter (\(_, done) -> not done)
+
 view : Address Action -> Model -> Html
 view address model =
   div
@@ -96,13 +102,20 @@ view address model =
           []
         ]
       , div []
-          [ button
-              [ type' "button"
-              , class "btn btn-danger"
-              , onClick address ClearDone
+        <| concat [
+          let buttonText = "Clear done " ++ (toString <| length <| doneTodos model.todos)
+          in
+            if (not <| isEmpty <| doneTodos model.todos) then
+              [ button
+                  [ type' "button"
+                  , class "btn btn-danger"
+                  , onClick address ClearDone
+                  ]
+                  [ text buttonText ]
               ]
-              [ text "Clear done" ]
-          ]
+            else []
+        ]
+
     ]
 
 update : Action -> Model -> (Model, Effects Action)
@@ -134,7 +147,7 @@ update action model =
       )
     ClearDone ->
       ( { model
-            | todos = List.filter (\(_, done) -> not done) model.todos
+            | todos = notDoneTodos model.todos
           }
         , Effects.none
       )
